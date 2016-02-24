@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJS - AMBERSIVE Menu Directive/Service</title>
+    <link   href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="../bower_components/ambersive-router-ui-auth/build/auth.js"></script>
+    <script src="../bower_components/ambersive-db/build/db.js"></script>
+    <script src="../build/menu.js"></script>
+    <script>
+
+
+        angular.module('app', ['ambersive.routerui.menu','ambersive.routerui.auth','ui.router'])
+        .run(function($log,$urlRouter){
+
+            $urlRouter.sync();
+            $urlRouter.listen();
+
+        })
+        .config(['$stateProvider','$urlRouterProvider','$dbSettingsProvider','$authenticationSettingsProvider','$windowProvider',
+            function ($stateProvider,$urlRouterProvider,$dbSettingsProvider,$authenticationSettingsProvider,$windowProvider) {
+
+                var protocol = $windowProvider.$get().location.protocol,
+                        host = $windowProvider.$get().location.host,
+                        path = $windowProvider.$get().location.pathname,
+                        base = protocol+'//'+host+path;
+
+                $dbSettingsProvider.setBaseUrl(base);
+
+                $authenticationSettingsProvider.setApiValue('baseUrl',base);
+                $authenticationSettingsProvider.setApiValue('url','data/response.json');
+
+                $authenticationSettingsProvider.setValue('redirect401Route','app.error');
+                $authenticationSettingsProvider.setValue('redirect403Route','app.error');
+                $authenticationSettingsProvider.setValue('redirect404Route','app.error');
+
+                    $stateProvider
+                       .state('app', {
+                           abstract: true,
+                           data: {
+                                roles: ['User']
+                           },
+                           views: {
+                               '': {
+                                   template: '<div ui-view="main"></div>'
+                               }
+                           }
+                       })
+                       .state('app.state1', {
+                            parent: 'app',
+                            url:'/state1',
+                            views: {
+                                'main@app': {
+                                    template: '<div>state 1</div>'
+                                }
+                            },
+                            menu:{
+                                label:'State 1',
+                                group:'main',
+                                sort:100
+                            }
+                       })
+                            .state('app.state1.a', {
+                                parent: 'app.state1',
+                                url:'/state1a',
+
+                                views: {
+                                    'main@app': {
+                                        template: '<div>state 1a</div>'
+                                    }
+                                },
+                                menu:{
+                                    label:'State 1a',
+                                    sort:80
+                                }
+                            })
+                            .state('app.state1.b', {
+                                parent: 'app.state1',
+                                url:'/state1b',
+
+                                views: {
+                                    'main@app': {
+                                        template: '<div>state 1b</div>'
+                                    }
+                                },
+                                menu:{
+                                    label:'State 1b',
+                                    sort:70,
+                                    hiddenAt:[
+                                       'app.state2'
+                                    ]
+                                }
+                            })
+                            .state('app.state1.ba', {
+                                parent: 'app.state1.b',
+                                url:'/state1ba',
+
+                                views: {
+                                    'main@app': {
+                                        template: '<div>state 1ba</div>'
+                                    }
+                                },
+                                menu:{
+                                    label:'State 1ba',
+                                    sort:70,
+                                }
+                            })
+                            .state('app.state1.bac', {
+                                parent: 'app.state1.ba',
+                                url:'/state1ba',
+
+                                views: {
+                                    'main@app': {
+                                        template: '<div>state 1ba</div>'
+                                    }
+                                },
+                                menu:{
+                                    label:'State 1bac',
+                                    sort:70,
+                                }
+                            })
+                       .state('app.state2', {
+                           parent: 'app',
+                           url:'/state2',
+                           views: {
+                               'main@app': {
+                                   template: '<div>state 2</div>'
+                               }
+                           },
+                           menu:{
+                               label:'State 2',
+                               group:'main',
+                               sort:100,
+                               hiddenAt:[
+                                   'app.state1'
+                               ]
+                           }
+                       })
+                       .state('app.state2a', {
+                           parent: 'app',
+                           url:'/state2a',
+                           views: {
+                               'main@app': {
+                                   template: '<div>state 2a</div>'
+                               }
+                           },
+                           menu:{
+                               label:'State 2a',
+                               sort:90
+                           }
+                       })
+                       .state('app.state3', {
+                           parent: 'app',
+                           url:'/state3',
+                           views: {
+                               'main@app': {
+                                   template: '<div>state 3</div>'
+                               }
+                           },
+                           menu:{
+                               label:'State 3',
+                               group:'test',
+                               sort:90
+                           },
+                           data: {
+                               roles: ['User']
+                           }
+                       })
+                       .state('app.state4', {
+                           parent: 'app',
+                           url:'/state4',
+                           views: {
+                               'main@app': {
+                                   template: '<div>state 4 - redirect - route</div>'
+                               }
+                           }
+                       })
+                       .state('app.state5', {
+                           parent: 'app',
+                           url:'/state5',
+                           views: {
+                               'main@app': {
+                                   template: '<div>state 5 - redirect - url</div>'
+                               }
+                           }
+                       })
+                       .state('app.error', {
+                           parent: 'app',
+                           url:'/error',
+                           data: {
+                           },
+                           views: {
+                               'main@app': {
+                                   template: '<div>error</div>'
+                               }
+                           }
+                       });
+
+            }])
+           .controller('DemoController',
+                   function($scope,$log,$rootScope){
+
+                       $scope.user = $rootScope.user;
+
+                   }
+           );
+
+    </script>
+
+</head>
+<body ng-app="app" ng-controller="DemoController">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>ROUTER-UI Menu Directive/Service</h1>
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                <h2>Standard</h2>
+                <router-ui-menu-groups></router-ui-menu-groups>
+                <h2>Standard - Group "test"</h2>
+                <router-ui-menu-groups group="test"></router-ui-menu-groups>
+                <h2>Standard - Custom Template</h2>
+                <router-ui-menu-groups template="customNavTemplate.html"></router-ui-menu-groups>
+            </div>
+            <div class="col-xs-12 col-sm-8">
+                <h2>State:</h2>
+                <div ui-view=""></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

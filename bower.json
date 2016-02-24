@@ -1,0 +1,33 @@
+{
+  "name": "ambersive-router-ui-menu",
+  "version": "0.0.1.0",
+  "authors": [
+    "Manuel Ihl <manuel.ihl@ambersive.com>"
+  ],
+  "description": "AngularJS (1.5) menu/navigation module for router-ui.",
+  "main": "build/menu.js",
+  "keywords": [
+    "AngularJS",
+    "Angular",
+    "Auth",
+    "Router-UI Menu",
+    "Router-UI Navigation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:AMBERSIVE/AngularJS---AuthSrv.git"
+  },
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "angular": "*",
+    "ambersive-db": "*",
+    "angular-ui-router": "~0.2.15",
+    "bootstrap": "^3.3.6",
+    "ambersive-router-ui-auth": "*"
+  },
+  "license": "MIT",
+  "homepage": "http://www.ambersive.com"
+}
