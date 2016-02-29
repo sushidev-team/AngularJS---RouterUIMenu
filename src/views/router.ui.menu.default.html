@@ -1,15 +1,15 @@
-<script type="text/ng-template" id="navElement.html">
-    <a ui-sref="{{child.name}}" >{{child.label}}</a>
-    <ul ng-if="child.children.length">
-        <li ng-repeat="child in child.children" ng-include="'navElement.html'" ui-sref-active="active"></li>
+<script type="text/ng-template" id="navElementDefault.html">
+    <a ui-sref="{{child.name}}" ><i ng-if="child.icon !== undefined && child.icon !== ''" class="{{child.icon}}"></i> {{child.label}}</a>
+    <ul ng-if="child.children.length" class="level_{{child.level}}">
+        <li ng-repeat="child in child.children" ng-include="'navElementDefault.html'" ui-sref-active="active"></li>
     </ul>
 </script>
 
 <div class="navigation">
     <ul class="nav nav-pills nav-stacked">
         <li ng-repeat="nav in data">
-            <ul class="nav">
-                <li ng-repeat="child in nav.children" ng-include="'navElement.html'" ui-sref-active="active"></li>
+            <ul class="nav level_0">
+                <li ng-repeat="child in nav.children" ng-include="'navElementDefault.html'" ui-sref-active="active"></li>
             </ul>
         </li>
     </ul>

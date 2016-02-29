@@ -71,6 +71,7 @@
                 RouterUiGroupState = function(){
                     return {
                         name:'',
+                        icon:'',
                         label:'',
                         sort:0,
                         hiddenAt:[],
@@ -155,7 +156,8 @@
                     Groups[state.menu.group] = {sort:0,children:[]};
                 }
 
-                var groupState      = new RouterUiGroupState();
+                var groupState      = new RouterUiGroupState(),
+                    level           = 1;
 
                 /**
                  * Loops a single entry through all its childstates
@@ -163,7 +165,9 @@
                  * @returns {Array}
                  */
 
-                var loopChildren    = function(name,parentState){
+                var loopChildren    = function(name,parentState,level){
+
+                    level++;
 
                     var children = [],
                         childStates = $state.get().filter(function(n){
@@ -181,9 +185,11 @@
                         var child       = new RouterUiGroupState();
                         child.name      = value.name;
                         child.label     = value.menu.label;
+                        child.icon      = value.menu.icon;
                         child.sort      = value.menu.sort;
                         child.hiddenAt  = value.menu.hiddenAt;
                         child.visibleAt = value.menu.visibleAt;
+                        child.level     = level;
 
                         if(child.hiddenAt === undefined){
                             child.hiddenAt = [];
@@ -197,10 +203,14 @@
                             parentState.hiddenAt = [];
                         }
 
-                        child.hiddenAt      = child.hiddenAt.concat(parentState.hiddenAt);
-                        child.visibleAt     = child.visibleAt.concat(parentState.visibleAt);
+                        if(parentState.hiddenAt !== undefined) {
+                            child.hiddenAt = child.hiddenAt.concat(parentState.hiddenAt);
+                        }
+                        if(parentState.visibleAt !== undefined) {
+                            child.visibleAt = child.visibleAt.concat(parentState.visibleAt);
+                        }
 
-                        child.children  = loopChildren(child.name,child);
+                        child.children  = loopChildren(child.name,child,level);
 
                         children.push(child);
 
@@ -211,13 +221,15 @@
 
                 groupState.name         = state.name;
                 groupState.label        = state.menu.label;
+                groupState.icon         = state.menu.icon;
                 groupState.sort         = state.menu.sort;
                 groupState.hiddenAt     = state.menu.hiddenAt;
                 groupState.visibleAt    = state.menu.visibleAt;
+                groupState.level        = level;
 
                 if(state.menu.group !== undefined) {
 
-                    groupState.children = loopChildren(state.name,groupState);
+                    groupState.children = loopChildren(state.name,groupState,level);
                     Groups[state.menu.group].children.push(groupState);
                 }
 
@@ -230,13 +242,18 @@
              *
              */
 
-            RouterUiMenuSrv.check = function(ele){
+            RouterUiMenuSrv.check = function(ele,e){
+
+
 
                 if(User.roles === undefined){
                     return ele;
                 }
 
+                var settings = this;
+
                 var check = function(n){
+
 
                     var stop    = false,
                         visible = true,
@@ -253,6 +270,10 @@
                             var hasState = false,
                                 current  = $state.current.name;
 
+                            if(state === undefined){
+                                return;
+                            }
+
                             if(current.indexOf(state) > -1){
                                 hasState = true;
                             }
@@ -262,6 +283,7 @@
                         },
                         currentAtHidden     = false,
                         currentAtVisible    = false;
+
 
                     if(n.children !== undefined && n.children.length > 0){
                         n.children = n.children.filter(check);
@@ -275,6 +297,10 @@
                         }
                     }
 
+                    if(settings.maxLevel !== undefined && settings.maxLevel < n.level){
+                        return;
+                    }
+
                     if(stop === true || visible === false){
                         return;
                     }
@@ -284,10 +310,13 @@
                      */
 
                     if(n.visibleAt !== undefined && angular.isArray(n.visibleAt)){
+
                         currentAtVisible =  n.visibleAt.some(checkState);
+
                         if(currentAtVisible === true){
                             return n;
                         }
+
                     }
 
                     if(n.hiddenAt !== undefined && angular.isArray(n.hiddenAt)){
@@ -396,7 +425,8 @@
 
             directive.scope = {
                 group:'@',
-                template:'@'
+                template:'@',
+                levels:'@?'
             };
 
             directive.replace = true;
@@ -461,9 +491,14 @@
                             groups = RouterUiMenuSrv.getSortedGroup();
                         }
 
-                        var copy = angular.copy(groups);
+                        var copy = angular.copy(groups),
+                            settings = {};
 
-                        $scope.data = copy.filter(RouterUiMenuSrv.check);
+                        if($scope.levels !== undefined){
+                            settings.maxLevel = parseInt($scope.levels);
+                        }
+
+                        $scope.data = copy.filter(RouterUiMenuSrv.check,settings);
 
                     };
 
@@ -505,7 +540,9 @@
                          * Get data
                          */
 
-                        routerUiMenu.getData();
+                        Auth.callAPI().then(function(){
+                            routerUiMenu.getData();
+                        });
 
                     };
 
@@ -543,10 +580,10 @@ angular.module('ambersive.routerui.menu').run(['$templateCache', function($templ
   'use strict';
 
   $templateCache.put('src/views/router.ui.menu.default.html',
-    "<script type=text/ng-template id=navElement.html><a ui-sref=\"{{child.name}}\" >{{child.label}}</a>\n" +
-    "    <ul ng-if=\"child.children.length\">\n" +
-    "        <li ng-repeat=\"child in child.children\" ng-include=\"'navElement.html'\" ui-sref-active=\"active\"></li>\n" +
-    "    </ul></script><div class=navigation><ul class=\"nav nav-pills nav-stacked\"><li ng-repeat=\"nav in data\"><ul class=nav><li ng-repeat=\"child in nav.children\" ng-include=\"'navElement.html'\" ui-sref-active=active></li></ul></li></ul></div>"
+    "<script type=text/ng-template id=navElementDefault.html><a ui-sref=\"{{child.name}}\" ><i ng-if=\"child.icon !== undefined && child.icon !== ''\" class=\"{{child.icon}}\"></i> {{child.label}}</a>\n" +
+    "    <ul ng-if=\"child.children.length\" class=\"level_{{child.level}}\">\n" +
+    "        <li ng-repeat=\"child in child.children\" ng-include=\"'navElementDefault.html'\" ui-sref-active=\"active\"></li>\n" +
+    "    </ul></script><div class=navigation><ul class=\"nav nav-pills nav-stacked\"><li ng-repeat=\"nav in data\"><ul class=\"nav level_0\"><li ng-repeat=\"child in nav.children\" ng-include=\"'navElementDefault.html'\" ui-sref-active=active></li></ul></li></ul></div>"
   );
 
 }]);

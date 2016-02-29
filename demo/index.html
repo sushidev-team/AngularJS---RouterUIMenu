@@ -58,6 +58,7 @@
                             },
                             menu:{
                                 label:'State 1',
+                                icon:'glyphicon glyphicon-home',
                                 group:'main',
                                 sort:100
                             }
@@ -73,7 +74,8 @@
                                 },
                                 menu:{
                                     label:'State 1a',
-                                    sort:80
+                                    sort:80,
+                                    visibleAt:['app.state1']
                                 }
                             })
                             .state('app.state1.b', {
@@ -200,9 +202,15 @@
 
             }])
            .controller('DemoController',
-                   function($scope,$log,$rootScope){
+                   function($scope,$log,$rootScope,Auth){
 
                        $scope.user = $rootScope.user;
+
+                       $scope.event = function(){
+                           Auth.callAPI().then(function(){
+                               alert('Update data')
+                           });
+                       };
 
                    }
            );
@@ -218,16 +226,22 @@
                 <h1>ROUTER-UI Menu Directive/Service</h1>
             </div>
             <div class="col-xs-12 col-sm-4">
-                <h2>Standard</h2>
+                <h2>Standard - Default</h2>
                 <router-ui-menu-groups></router-ui-menu-groups>
                 <h2>Standard - Group "test"</h2>
                 <router-ui-menu-groups group="test"></router-ui-menu-groups>
                 <h2>Standard - Custom Template</h2>
                 <router-ui-menu-groups template="customNavTemplate.html"></router-ui-menu-groups>
+                <h2>Levels</h2>
+                <router-ui-menu-groups levels="2"></router-ui-menu-groups>
             </div>
             <div class="col-xs-12 col-sm-8">
                 <h2>State:</h2>
                 <div ui-view=""></div>
+                <h2>Fire Authentication Event</h2>
+                <div>
+                    <button ng-click="event()" class="btn">Authentication-Check</button>
+                </div>
             </div>
         </div>
     </div>

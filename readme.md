@@ -3,7 +3,7 @@
 An AngularJS (1.5) service for adding an menu. Based on the [AuthSrv](https://github.com/AMBERSIVE/AngularJS---AuthSrv) this module provides a flexible navigation.
 
 ### Version
-0.0.1.0
+0.0.2.0
 
 ### Installation
 
@@ -22,8 +22,6 @@ angular.module('app', ['ambersive.routerui.menu','ambersive.routerui.auth']);
 ### Configuration
 
 Please be aware, that you need the basic configuration of ['ambersive.routerui.auth'](https://github.com/AMBERSIVE/AngularJS---AuthSrv). Otherwise the module will throw an error.
-
-```
 
 ### Useage
 
@@ -46,6 +44,7 @@ $stateProvider
               label:'State 1',
               group:'main',
               sort:100,
+              icon:'',
               hiddenAt:[],
               visibleAt:[]
           }
@@ -76,6 +75,14 @@ To use a custom template you need to define a template url. $templateCache suppo
 
 ```sh
     <router-ui-menu-groups template="PATH to Template"></router-ui-menu-groups>
+```
+
+#### Levels
+
+To limit the level shown add the levels attribute to the directive. The ground level = 0;
+
+```sh
+    <router-ui-menu-groups levels="1"></router-ui-menu-groups>
 ```
 
 License
