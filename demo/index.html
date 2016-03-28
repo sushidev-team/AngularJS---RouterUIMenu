@@ -202,7 +202,7 @@
 
             }])
            .controller('DemoController',
-                   function($scope,$log,$rootScope,Auth){
+                   function($scope,$state,$log,$rootScope,Auth,RouterUiMenuSrv,$timeout){
 
                        $scope.user = $rootScope.user;
 
@@ -211,6 +211,11 @@
                                alert('Update data')
                            });
                        };
+
+                       $timeout(function(){
+                           var states = RouterUiMenuSrv.getStatesByParent($state.$current.name);
+                           $log.log(states);
+                       });
 
                    }
            );

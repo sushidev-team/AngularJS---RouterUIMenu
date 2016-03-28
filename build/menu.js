@@ -132,6 +132,31 @@
 
             };
 
+            RouterUiMenuSrv.getStatesByParent = function (parentName,sort) {
+
+                var states = $state.get();
+
+                if(sort === undefined){
+                    sort = true;
+                }
+
+                states = states.filter(function(state){
+                    if (state.parent !== undefined && state.parent === parentName)
+                    {
+                        return state;
+                    }
+                });
+
+                if(sort === true){
+
+                    states = states.sort(sortFn);
+
+                }
+
+                return states;
+
+            };
+
             RouterUiMenuSrv.getGroupNameForState = function(stateName){
 
                 var state = $state.get(stateName);
