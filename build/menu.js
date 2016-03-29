@@ -15,7 +15,8 @@
         function(){
 
             var values = {
-                template:'src/views/router.ui.menu.default.html'
+                template:'src/views/router.ui.menu.default.html',
+                templateInline:'src/views/router.ui.menu.inline.html'
             };
 
             return({
@@ -26,7 +27,8 @@
                 $get: function () {
                     return {
                         all:values,
-                        template:values.template
+                        template:values.template,
+                        templateInline:values.templateInline
                     };
                 }
             });
@@ -600,6 +602,165 @@
         }
     ]);
 
+    angular.module('ambersive.routerui.menu').directive('routerUiMenu',['$compile','RouterUiMenuSrv',
+        function($compile,RouterUiMenuSrv){
+
+            var directive = {};
+
+            directive.restrict = 'E';
+
+            directive.scope = {
+                parent:'@',
+                template:'@'
+            };
+
+            directive.replace = true;
+
+            directive.transclude = true;
+
+            directive.controller = ['$compile','$scope','$state','$element','$log','$timeout','$templateCache','$http','RouterUiMenuSrv','$routerMenuSettings','Auth',
+                function($compile,$scope,$state,$element,$log,$timeout,$templateCache,$http,RouterUiMenuSrv,$routerMenuSettings,Auth){
+
+                    var routerUiMenu    = this,
+                        User            = {};
+
+                    $scope.data = [];
+                    $scope.getTemplateByUrl = false;
+
+                    /**
+                     * Get parameters
+                     */
+
+                    if($scope.group !== undefined){ routerUiMenu.group = $scope.group;}
+                    if($scope.template !== undefined){ routerUiMenu.templateUrl = $scope.template;} else { routerUiMenu.templateUrl = $routerMenuSettings.templateInline;}
+
+                    /**
+                     * Broadcasts
+                     */
+
+                    $scope.$on('$stateAuthenticationUser',function(event,args){
+                        User = args.user;
+                        routerUiMenu.getData();
+                        $timeout(function(){
+                            $scope.$apply();
+                        },100);
+                    });
+
+                    $scope.$on('$stateChangeSuccess',
+                        function(event, toState, toParams, fromState, fromParams){
+                            routerUiMenu.getData();
+                        }
+                    );
+
+                    /**
+                     * Functions
+                     */
+
+                    $scope.warn = function(msg){
+                        $log.warn(msg);
+                    };
+
+                    routerUiMenu.getData = function(){
+
+                        var parentState;
+
+                        if(User.roles === undefined){
+                            return;
+                        }
+
+                        if($scope.parent === undefined){
+                            parentState = $state.current.name;
+                        } else {
+                            parentState = $scope.parent;
+                        }
+
+                        var data          = RouterUiMenuSrv.getStatesByParent(parentState);
+
+                        var copy = angular.copy(data),
+                            settings = {};
+
+                        $scope.data = copy.filter(RouterUiMenuSrv.check,settings);
+
+                    };
+
+                    routerUiMenu.init = function(){
+
+
+                        var template    = null,
+                            templateUrl = null;
+
+                        /**
+                         * Get Template
+                         */
+
+                        template = $templateCache.get(routerUiMenu.templateUrl);
+
+                        if(template === undefined){
+
+                            $scope.getTemplateByUrl = true;
+
+                            if(routerUiMenu.templateUrl === undefined){
+                                $scope.warn('ambersive.routerui.menu: $http loading template missing.');
+                                return;
+                            }
+
+                            $http.get(routerUiMenu.templateUrl, {}).then(function(result){
+                                if(result.status === 200){
+                                    template = result.data;
+
+                                    $element.html(template);
+                                    $element.replaceWith($compile($element.html())($scope));
+
+                                } else {
+                                    $scope.warn('ambersive.routerui.menu: $http loading template failed');
+                                }
+                            }, function(){
+                                $scope.warn('ambersive.routerui.menu: $http loading template failed');
+                            });
+
+                        }
+
+                        $scope.templateHtml = template;
+
+                        /**
+                         * Get data
+                         */
+
+                        Auth.callAPI().then(function(){
+                            routerUiMenu.getData();
+                        });
+
+                    };
+
+                    routerUiMenu.init();
+
+                }
+            ];
+
+            directive.link = function(scope,element,attrs){
+                try {
+
+                    if(scope.getTemplateByUrl === true){
+                        return;
+                    }
+
+                    if(scope.templateHtml === undefined){
+                        scope.warn('ambersive.routerui.menu: template is undefined');
+                        return;
+                    }
+
+                    element.html(scope.templateHtml);
+                    element.replaceWith($compile(element.html())(scope));
+
+                } catch(err){
+                    scope.warn(err);
+                }
+            };
+
+            return directive;
+        }
+    ]);
+
 })(window, document, undefined);
 angular.module('ambersive.routerui.menu').run(['$templateCache', function($templateCache) {
   'use strict';
@@ -609,6 +770,11 @@ angular.module('ambersive.routerui.menu').run(['$templateCache', function($templ
     "    <ul ng-if=\"child.children.length\" class=\"level_{{child.level}}\">\n" +
     "        <li ng-repeat=\"child in child.children\" ng-include=\"'navElementDefault.html'\" ui-sref-active=\"active\"></li>\n" +
     "    </ul></script><div class=navigation><ul class=\"nav nav-pills nav-stacked\"><li ng-repeat=\"nav in data\"><ul class=\"nav level_0\"><li ng-repeat=\"child in nav.children\" ng-include=\"'navElementDefault.html'\" ui-sref-active=active></li></ul></li></ul></div>"
+  );
+
+
+  $templateCache.put('src/views/router.ui.menu.inline.html',
+    "<script type=text/ng-template id=navElementInline.html><a ui-sref=\"{{element.name}}\" ><i ng-if=\"nav.icon !== undefined && nav.icon !== ''\" class=\"{{nav.icon}}\"></i> <span ng-if=\"element.menu === undefined || element.menu.label === undefined\">{{element.label}}</span><span ng-if=\"element.menu !== undefined && element.menu.label !== undefined\">{{element.menu.label}}</span></a></script><div class=navigation><ul class=\"nav nav-tabs\"><li ng-repeat=\"element in data\" ng-include=\"'navElementInline.html'\" ui-sref-active=active></li></ul></div>"
   );
 
 }]);

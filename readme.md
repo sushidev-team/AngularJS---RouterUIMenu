@@ -3,7 +3,7 @@
 An AngularJS (1.5) service for adding an menu. Based on the [AuthSrv](https://github.com/AMBERSIVE/AngularJS---AuthSrv) this module provides a flexible navigation.
 
 ### Version
-0.0.2.1
+0.0.3.0
 
 ### Installation
 
@@ -83,6 +83,15 @@ To limit the level shown add the levels attribute to the directive. The ground l
 
 ```sh
     <router-ui-menu-groups levels="1"></router-ui-menu-groups>
+```
+
+#### By Parent
+
+The following directive had been added in version 0.3.0 and includes a easy way to display a navigation based on the parent state.
+By default it always uses the current state.
+
+```sh
+    <router-ui-menu parent="parentname"></router-ui-menu-groups>
 ```
 
 License
