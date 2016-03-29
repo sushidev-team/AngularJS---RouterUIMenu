@@ -10,7 +10,7 @@ angular.module('ambersive.routerui.menu').run(['$templateCache', function($templ
 
 
   $templateCache.put('src/views/router.ui.menu.inline.html',
-    "<script type=text/ng-template id=navElementInline.html><a ui-sref=\"{{element.name}}\" ><i ng-if=\"nav.icon !== undefined && nav.icon !== ''\" class=\"{{nav.icon}}\"></i> <span ng-if=\"element.menu === undefined || element.menu.label === undefined\">{{element.label}}</span><span ng-if=\"element.menu !== undefined && element.menu.label !== undefined\">{{element.menu.label}}</span></a></script><div class=navigation><ul class=\"nav nav-tabs\"><li ng-repeat=\"element in data\" ng-include=\"'navElementInline.html'\" ui-sref-active=active></li></ul></div>"
+    "<script type=text/ng-template id=navElementInline.html><a ui-sref=\"{{element.name}}\" class=\"nav-link\"><i ng-if=\"nav.icon !== undefined && nav.icon !== ''\" class=\"{{nav.icon}}\"></i> <span ng-if=\"element.menu === undefined || element.menu.label === undefined\">{{element.label}}</span><span ng-if=\"element.menu !== undefined && element.menu.label !== undefined\">{{element.menu.label}}</span></a></script><div class=navigation><ul class=\"nav nav-tabs\"><li ng-repeat=\"element in data\" ng-include=\"'navElementInline.html'\" class=nav-item ui-sref-active=active></li></ul></div>"
   );
 
 }]);
