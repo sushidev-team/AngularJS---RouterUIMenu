@@ -3,7 +3,7 @@
 An AngularJS (1.5) service for adding an menu. Based on the [AuthSrv](https://github.com/AMBERSIVE/AngularJS---AuthSrv) this module provides a flexible navigation.
 
 ### Version
-0.0.3.1
+0.0.3.2
 
 ### Installation
 
