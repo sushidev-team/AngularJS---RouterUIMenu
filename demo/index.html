@@ -51,6 +51,9 @@
                        .state('app.state1', {
                             parent: 'app',
                             url:'/state1',
+                            data: {
+                               roles: ['User']
+                            },
                             views: {
                                 'main@app': {
                                     template: '<div>state 1</div>'

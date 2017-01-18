@@ -53,7 +53,7 @@
 
                 statesCount++;
 
-                if(state.menu !== undefined){
+                if(angular.isDefined(state.menu) && angular.isDefined(state.menu.label)){
                     RouterUiMenuSrv.registerState(state);
                 }
 
@@ -205,6 +205,8 @@
 
                     childStates.forEach(function(value,index){
 
+                        var roles = null;
+
                         /**
                          * Insert the children and re-run the process
                          */
@@ -217,6 +219,7 @@
                         child.hiddenAt  = value.menu.hiddenAt;
                         child.visibleAt = value.menu.visibleAt;
                         child.level     = level;
+                        child.data      = value.data || {};
 
                         if(child.hiddenAt === undefined){
                             child.hiddenAt = [];
@@ -253,6 +256,7 @@
                 groupState.hiddenAt     = state.menu.hiddenAt;
                 groupState.visibleAt    = state.menu.visibleAt;
                 groupState.level        = level;
+                groupState.data         = state.data || {};
 
                 if(state.menu.group !== undefined) {
 
